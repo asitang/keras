@@ -1,0 +1,4 @@
+imagemod imageinput1:flatten1
+textmod textinput1:lstmlayer1
+textandimagemod imageinput1,textinput1:denselayer1
+videomod videoinput1,textinput2:denselayer2

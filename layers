@@ -1,0 +1,25 @@
+imageinput1	input	{shape=(3, 224, 224)}
+convolayer1	convo2d	{64, 3, 3, activation='relu', border_mode='same', dim_ordering='th'}
+convolayer2	@convolayer1
+maxpoollayer1	maxpool2d	{(2, 2),dim_ordering="th"}
+convolayer3	@convolayer1
+convolayer4	@convolayer1
+maxpoollayer2	@maxpoollayer1
+convolayer5	@convolayer1
+convolayer6	@convolayer1
+convolayer7	@convolayer1
+maxpoollayer3	@maxpoollayer1
+flatten1	flatten	{}
+textinput1	input	{shape=(100,), dtype='int32'}
+embedlayer1	embed	{input_dim=10000,output_dim=256,input_length=100}
+lstmlayer1	lstm	{256}
+mergelayer1	merge	{mode='concat'}
+denselayer1	dense	{1000,activation='softmax'}
+videoinput1	input	{shape=(100,3,224,224)}
+textinput2	@textinput1
+videncoded	@lstmlayer1
+timedistributelayer1	timedist	{}
+useimagemod	@@imagemod
+usetextmod	@@textmod
+mergelayer2	@mergelayer1
+denselayer2	@denselayer1

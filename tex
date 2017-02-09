@@ -1,0 +1,38 @@
+digraph G {
+concentrate=True;
+rankdir=TB;
+node [shape=record];
+4560951632 [label="input_2: InputLayer\n|{input:|output:}|{{(None, 3, 224, 224)}|{(None, 3, 224, 224)}}"];
+4563062608 [label="convolution2d_1: Convolution2D\n|{input:|output:}|{{(None, 3, 224, 224)}|{(None, 64, 224, 224)}}"];
+4564605392 [label="convolution2d_2: Convolution2D\n|{input:|output:}|{{(None, 64, 224, 224)}|{(None, 64, 224, 224)}}"];
+4412708304 [label="maxpooling2d_1: MaxPooling2D\n|{input:|output:}|{{(None, 64, 224, 224)}|{(None, 64, 112, 112)}}"];
+4565166608 [label="convolution2d_3: Convolution2D\n|{input:|output:}|{{(None, 64, 112, 112)}|{(None, 64, 112, 112)}}"];
+4565229328 [label="convolution2d_4: Convolution2D\n|{input:|output:}|{{(None, 64, 112, 112)}|{(None, 64, 112, 112)}}"];
+4565404560 [label="maxpooling2d_2: MaxPooling2D\n|{input:|output:}|{{(None, 64, 112, 112)}|{(None, 64, 56, 56)}}"];
+4565939792 [label="convolution2d_5: Convolution2D\n|{input:|output:}|{{(None, 64, 56, 56)}|{(None, 64, 56, 56)}}"];
+4565941136 [label="convolution2d_6: Convolution2D\n|{input:|output:}|{{(None, 64, 56, 56)}|{(None, 64, 56, 56)}}"];
+4559696144 [label="input_1: InputLayer\n|{input:|output:}|{{(None, 100)}|{(None, 100)}}"];
+4566181840 [label="convolution2d_7: Convolution2D\n|{input:|output:}|{{(None, 64, 56, 56)}|{(None, 64, 56, 56)}}"];
+4419587024 [label="embedding_1: Embedding\n|{input:|output:}|{{(None, 100)}|{(None, 100, 256)}}"];
+4566829584 [label="maxpooling2d_3: MaxPooling2D\n|{input:|output:}|{{(None, 64, 56, 56)}|{(None, 64, 28, 28)}}"];
+4560122832 [label="lstm_1: LSTM\n|{input:|output:}|{{(None, 100, 256)}|{(None, 256)}}"];
+4566776272 [label="flatten_1: Flatten\n|{input:|output:}|{{(None, 64, 28, 28)}|{(None, 50176)}}"];
+4572621904 [label="merge_2: Merge\n|{input:|output:}|{{[(None, 256), (None, 50176)]}|{(None, 50432)}}"];
+4573206416 [label="dense_2: Dense\n|{input:|output:}|{{(None, 50432)}|{(None, 1000)}}"];
+4560951632 -> 4563062608;
+4563062608 -> 4564605392;
+4564605392 -> 4412708304;
+4412708304 -> 4565166608;
+4565166608 -> 4565229328;
+4565229328 -> 4565404560;
+4565404560 -> 4565939792;
+4565939792 -> 4565941136;
+4565941136 -> 4566181840;
+4559696144 -> 4419587024;
+4566181840 -> 4566829584;
+4419587024 -> 4560122832;
+4566829584 -> 4566776272;
+4560122832 -> 4572621904;
+4566776272 -> 4572621904;
+4572621904 -> 4573206416;
+}

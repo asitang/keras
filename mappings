@@ -1,0 +1,11 @@
+input:Input
+convo2d:Convolution2D
+convo3d:Convolution3D
+maxpool2d:MaxPooling2D
+maxpool3d:MaxPooling3D
+flatten:Flatten
+embed:Embedding
+lstm:LSTM
+merge:merge
+dense:Dense
+timedist:TimeDistributed
