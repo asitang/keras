@@ -24,9 +24,6 @@ def merge_notebooks(filenames):
         if merged is None:
             merged = nb
         else:
-            # TODO: add an optional marker between joined notebooks
-            # like an horizontal rule, for example, or some other arbitrary
-            # (user specified) markdown cell)
             merged.cells.extend(nb.cells)
     if not hasattr(merged.metadata, 'name'):
         merged.metadata.name = ''
@@ -71,8 +68,7 @@ def readconfig(connections,models,layers,mappings):
         input=input.split(',')
         output=line[1]
         modelinputs[name]=input
-        modeloutputs[name]=output # always only one output
-
+        modeloutputs[name]=output
     mappings=open(mappings,'r')
     for line in mappings:
         line = line.strip()
@@ -101,7 +97,6 @@ def createadjecency():
             for i in range(0,len(inputs)-1):
                 updateadj(adlist,inputs[i+1],inputs[i])
 
-    #find the nodes that are not in the values: find the diff : keys - values
     tops=list(set(adlist.keys()) - set(list(itertools.chain.from_iterable(adlist.values()))))
     return tops
 
@@ -109,7 +104,6 @@ def createadjecency():
 
 
 
-    #disentagle and fill the adlist
 
 
 
@@ -117,7 +111,6 @@ def producecode(myname):
 
     code = ''
 
-    # won't go on reimplementing the graph it is already implemented
     if myname in implementednodes:
         return code
     else:
@@ -125,18 +118,15 @@ def producecode(myname):
 
 
 
-    #find the properties and primitives. Also, create uncreated model subgraphs that this graph/node depends on
     type=layertype[myname]
     properties=layerprop[myname]
     modelname=''
 
     if '@@' in type:
-        #it's a model reference: identify the new root (if not already implemented and start implementing it)
-        #when it returns you Modelify it
         type = type.replace('@@', '')
         modelname=type
 
-        codetemp = producecode(modeloutputs[modelname]) #won't go on reimplementing the graph if it is already implemented
+        codetemp = producecode(modeloutputs[modelname])
         code += '\n' + codetemp
 
         code +='\n'+type+' = Model('
@@ -152,7 +142,6 @@ def producecode(myname):
 
 
     elif '@' in type:
-        #it's a config reuse
         type=type.replace('@','')
         properties = layerprop[type]
         type=layertype[type]
@@ -161,7 +150,6 @@ def producecode(myname):
 
 
 
-    #check it's the leaf node: just produce the correct code and return
     if myname in adlist.keys():
         kids=adlist[myname]
 
@@ -172,13 +160,11 @@ def producecode(myname):
             code+=myname+' = '+type+'('+properties+')'
         return code
 
-    #produce the back code first
     for kid in kids:
         codetemp=producecode(kid)
         code+='\n'+codetemp
 
 
-    #create the current code
     if len(kids)==1:
         if modelname!='':
             code += '\n' + myname + ' = ' + type +'(' + list(kids)[0] + ')'
@@ -219,14 +205,6 @@ def start():
     readconfig('connections','models','layers','mappings')
     tops=createadjecency()
 
-    #print tops
-    # print layertype
-    # print layerprop
-    # print modelinputs
-    # print modeloutputs
-    # print connectionslist
-    # print adlist
-    # print primitivemappings
 
     code=''
     for modeloutput in modeloutputs.values():
@@ -255,7 +233,6 @@ def start():
     autocode.close()
 
 
-    # create a jupyter notebook
 
     code=imports+code
 
