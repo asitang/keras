@@ -1,3 +1,11 @@
+FRAMEWORK:
+
+keras
+
+
+
+LAYERS:
+
 imageinput1	input	{shape=(3, 224, 224)}
 convolayer1	convo2d	{64, 3, 3, activation='relu', border_mode='same', dim_ordering='th'}
 convolayer2	@convolayer1
@@ -23,3 +31,38 @@ useimagemod	@@imagemod
 usetextmod	@@textmod
 mergelayer2	@mergelayer1
 denselayer2	@denselayer1
+
+
+
+CONNECTIONS:
+
+textinput1 > embedlayer1 > lstmlayer1
+
+imageinput1 > convolayer1 > convolayer2 > maxpoollayer1 > convolayer3 > convolayer4 > maxpoollayer2 > convolayer5 > convolayer6 > convolayer7 > maxpoollayer3 > flatten1
+
+flatten1 + lstmlayer1 : mergelayer1
+
+mergelayer1 > denselayer1
+
+textinput2 > usetextmod
+
+videoinput1 + useimagemod : timedistributelayer1
+
+timedistributelayer1 > videncoded
+
+videncoded + usetextmod : mergelayer2
+
+mergelayer2 > denselayer2
+
+
+
+MODELS:
+
+imageinput1 -> flatten1 : imagemod
+
+textinput1 -> lstmlayer1 : textmod
+
+imageinput1 , textinput1 -> denselayer1 : textandimagemod
+
+videoinput1 , textinput2 -> denselayer2 : videomod
+

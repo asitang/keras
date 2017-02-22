@@ -1,8 +1,8 @@
+import io
 import itertools
+
 import nbformat as nbf
 from nbconvert.preprocessors import ExecutePreprocessor
-import io
-
 
 #adlist={parent:[list of kids]}
 
@@ -19,7 +19,7 @@ implementedmodels=set()
 def merge_notebooks(filenames):
     merged = None
     for fname in filenames:
-        with io.open(fname+'.ipynb', 'r', encoding='utf-8') as f:
+        with io.open('temp/' + fname + '.ipynb', 'r', encoding='utf-8') as f:
             nb = nbf.read(f, as_version=4)
         if merged is None:
             merged = nb
@@ -28,7 +28,7 @@ def merge_notebooks(filenames):
     if not hasattr(merged.metadata, 'name'):
         merged.metadata.name = ''
     merged.metadata.name += "_merged"
-    with open('merged.ipynb', 'w') as f:
+    with open('notebooks/notebook.ipynb', 'w') as f:
         nbf.write(merged, f)
 
 
@@ -40,40 +40,68 @@ def updateadj(adj,key,value):
     adj[key].add(value)
 
 
-def readconfig(connections,models,layers,mappings):
+def readconfig(configfile, mappings):
+    f = open(configfile)
+    line = f.readline()
+    position = ''
+    layerdone = 0
 
-    layers = open(layers, 'r')
-    for line in layers:
-        line=line.strip()
-        line=line.split('\t')
-        name=line[0]
-        type=line[1]
-        if len(line)>2:
-            properties=line[2]
-        layertype[name]=type
-        layerprop[name]=properties.replace('{','').replace('}','')
+    for line in f:
+        if layerdone == 0:
+            line = line.strip()
+            if line == 'LAYERS:':
+                position = line
+                layerdone = 1
+                continue
+            else:
+                continue
 
-    connections = open(connections, 'r')
-    for line in connections:
-        line = line.strip()
-        connectionslist.append(line)
+        if position == 'LAYERS:':
+            line = line.strip().replace(' ', '')
+            if line == 'CONNECTIONS:':
+                position = line
+                continue
+            if line == '':
+                continue
+            line = line.split('\t')
+            name = line[0]
+            type = line[1]
+            if len(line) > 2:
+                properties = line[2]
+            layertype[name] = type
+            layerprop[name] = properties.replace('{', '').replace('}', '')
 
-    models = open(models, 'r')
-    for line in models:
-        line = line.strip()
-        line=line.split(' ')
-        name=line[0]
-        line=line[1].split(':')
-        input=line[0]
-        input=input.split(',')
-        output=line[1]
-        modelinputs[name]=input
-        modeloutputs[name]=output
+        if position == 'CONNECTIONS:':
+            line = line.strip().replace(' ', '')
+            if line == 'MODELS:':
+                position = line
+                continue
+            if line == '':
+                continue
+            line = line.strip().replace(' ', '')
+            connectionslist.append(line)
+
+        if position == 'MODELS:':
+            line = line.strip().replace(' ', '')
+            if line == '':
+                continue
+            line = line.split(':')
+            name = line[1]
+            line = line[0].split('->')
+            input = line[0]
+            input = input.split(',')
+            output = line[1]
+            modelinputs[name] = input
+            modeloutputs[name] = output
+
+    f.close()
+
     mappings=open(mappings,'r')
     for line in mappings:
-        line = line.strip()
+        line = line.strip().replace(' ', '')
         line=line.split(':')
         primitivemappings[line[0]]=line[1]
+
 
     for modelprimes in modelinputs.keys():
         primitivemappings[modelprimes]=modelprimes
@@ -86,14 +114,14 @@ def createadjecency():
     for line in connectionslist:
         line=line.strip()
         if ':' in line:
-            inputs=line.split(':')[0].split(',')
+            inputs = line.split(':')[0].split('+')
             output=line.split(':')[1]
             for input in inputs:
                 updateadj(adlist,output,input)
 
 
         else:
-            inputs=line.split(',')
+            inputs = line.split('>')
             for i in range(0,len(inputs)-1):
                 updateadj(adlist,inputs[i+1],inputs[i])
 
@@ -137,7 +165,7 @@ def producecode(myname):
             code +=input+','
 
         code=code[:-1]
-        code +='])'
+        code += '], name = \'' + type + '\')'
 
 
 
@@ -172,7 +200,7 @@ def producecode(myname):
             code += '\n' + myname + ' = ' + type + '(' + properties + ')' + '(' + list(kids)[0] + ')'
     else:
         if type=='merge':
-            code += '\n'+myname+'='+type+'(['
+            code += '\n' + myname + ' = ' + type + '(['
             for kid in kids:
                 code+=kid+','
             code=code[:-1]
@@ -193,7 +221,7 @@ def producecode(myname):
 
 
 def start():
-    autocode=open('auto.py','w')
+    autocode = open('gencode/auto.py', 'w')
 
     imports='from keras.layers import Convolution2D, MaxPooling2D, Flatten' \
             '\nfrom keras.layers import Input, LSTM, Embedding, Dense, merge' \
@@ -201,8 +229,7 @@ def start():
             '\nfrom keras.utils.visualize_util import plot' \
             '\nfrom keras.layers import TimeDistributed'
 
-
-    readconfig('connections','models','layers','mappings')
+    readconfig('configuration/config', 'configuration/mappings')
     tops=createadjecency()
 
 
@@ -222,11 +249,11 @@ def start():
         code = code[:-1]
         code += '])'
 
-
+    plotdir = 'plots/'
     for model in modeloutputs.keys():
-        code+='\n'+'plot('+model+', to_file = \''+model+'.png\', show_layer_names=True, show_shapes=True)'
+        code += '\n' + 'plot(' + model + ', to_file = \'' + plotdir + model + '.png\', show_layer_names=True, show_shapes=True)'
 
-    print code
+    # print code
 
     autocode.write(imports)
     autocode.write(code)
@@ -235,9 +262,9 @@ def start():
 
 
     code=imports+code
-
+    plotdir = 'plots/'
     imagetemp1="from IPython.display import Image\n"
-    imagetemp2="Image(filename=\'"
+    imagetemp2 = "Image(filename=\'" + plotdir
     imagetemp3="\', embed=True,format='png')"
 
     nb = nbf.v4.new_notebook()
@@ -251,7 +278,7 @@ def start():
     ep = ExecutePreprocessor(timeout=600, kernel_name='python2')
     ep.preprocess(nb,{})
 
-    with open('code.ipynb', 'w') as f:
+    with open('temp/code.ipynb', 'w') as f:
         nbf.write(nb, f)
 
 
@@ -261,7 +288,7 @@ def start():
         nbout['cells'] = [(nbf.v4.new_code_cell(outputcode))]
         ep = ExecutePreprocessor(timeout=600, kernel_name='python2')
         ep.preprocess(nbout, {})
-        with open(model + '.ipynb', 'w') as f:
+        with open('temp/' + model + '.ipynb', 'w') as f:
             nbf.write(nbout, f)
 
     merge=[]

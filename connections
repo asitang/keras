@@ -1,9 +1,0 @@
-imageinput1,convolayer1,convolayer2,maxpoollayer1,convolayer3,convolayer4,maxpoollayer2,convolayer5,convolayer6,convolayer7,maxpoollayer3,flatten1
-textinput1,embedlayer1,lstmlayer1
-flatten1,lstmlayer1:mergelayer1
-mergelayer1,denselayer1
-textinput2,usetextmod
-videoinput1,useimagemod:timedistributelayer1
-timedistributelayer1,videncoded
-videncoded,usetextmod:mergelayer2
-mergelayer2,denselayer2
