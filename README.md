@@ -36,3 +36,13 @@ format
 ###MODELS:  
 * ```imageinput1 , textinput1 -> denselayer1 : textandimagemod```  
 here we define a model named  textandimagemod with imageinput1 and textinput1 as inputs and denselayer1 as the output  
+
+##Usage  
+
+* Create a configuration file  
+* Run ```python generate.py <configFilePath>```
+* Creates a file gencode/auto.py which is the generated code
+* Creates a jupyter notebook notebooks/notebook.ipynb
+
+
+
